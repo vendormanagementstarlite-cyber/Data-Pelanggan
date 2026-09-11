@@ -1,1267 +1,142 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <base target="_top">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Portal Data Mitra - Starlite</title>
   <style>
     :root {
       --navy-deep: #06091A;
-      --navy: #0A1428;
-      --navy-panel: #0E1B38;
-      --navy-panel-2: #0A1530;
-      --navy-line: #22315A;
-      --navy-line-soft: rgba(255,255,255,0.06);
       --gold: #D8A83C;
       --gold-soft: #ECC468;
-      --gold-deep: #B4862C;
-      --cream: #EDEFF7;
       --muted: #8C9AC2;
-      --muted-soft: #66739C;
-      --sky: #4FB8F5;
-      --green: #2FC48D;
-      --green-bg: rgba(47,196,141,0.14);
-      --amber-bg: rgba(216,168,60,0.14);
-      --danger: #FF7C7C;
-      --r-sm: 8px;
-      --r-md: 12px;
-      --r-lg: 18px;
-      --shadow-sm: 0 2px 10px rgba(2,5,14,0.35);
-      --shadow-md: 0 14px 32px rgba(2,5,14,0.45);
-      --shadow-lg: 0 28px 64px rgba(2,5,14,0.55);
     }
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; overflow-x: hidden; }
-    body {
+    html, body {
       margin: 0;
-      overflow-x: hidden;
+      padding: 0;
+      height: 100%;
+      background: var(--navy-deep);
       font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      overflow: hidden;
+    }
+    #appFrame {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* Layar loading, tampil sampai iframe selesai dimuat */
+    #loadingScreen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
       background:
         radial-gradient(circle at 12% -10%, rgba(216,168,60,0.09) 0%, transparent 42%),
         radial-gradient(circle at 88% 4%, rgba(79,184,245,0.10) 0%, transparent 45%),
         radial-gradient(circle at 85% 0%, #17305F 0%, var(--navy-deep) 55%),
-        radial-gradient(circle at 8% 96%, rgba(216,168,60,0.05) 0%, transparent 38%),
         var(--navy-deep);
-      color: var(--cream);
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
+      z-index: 10;
+      transition: opacity 0.35s ease;
     }
-    h1, h2, h3, .brand .wordmark, .achieve-num, .hero-watermark {
-      font-family: 'Space Grotesk', 'Inter', sans-serif;
-    }
-    a, button, input, select { font-family: inherit; }
-
-    ::selection { background: rgba(216,168,60,0.35); color: #fff; }
-
-    :focus-visible {
-      outline: 2px solid var(--gold);
-      outline-offset: 2px;
-      border-radius: 4px;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-    }
-
-    /* thin gold-tinted scrollbars where relevant */
-    .table-scroll::-webkit-scrollbar { height: 10px; }
-    .table-scroll::-webkit-scrollbar-track { background: var(--navy-panel-2); }
-    .table-scroll::-webkit-scrollbar-thumb { background: var(--navy-line); border-radius: 20px; }
-    .table-scroll::-webkit-scrollbar-thumb:hover { background: var(--gold-deep); }
-
-    /* ===================== LOGIN ===================== */
-    #loginScreen {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 24px;
-      position: relative;
-      overflow: hidden;
-    }
-    .login-watermark {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 900px;
-      max-width: 160vw;
-      opacity: 0.045;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .login-box { position: relative; z-index: 1; }
-    .navbar .brand img.logo-icon { height: 26px; width: auto; }
-    .hero-watermark img {
-      width: 420px;
-      height: auto;
-      opacity: 0.07;
-    }
-    .login-box {
-      background: linear-gradient(165deg, var(--navy-panel) 0%, var(--navy-panel-2) 100%);
-      border: 1px solid var(--navy-line);
-      border-radius: var(--r-lg);
-      box-shadow: var(--shadow-lg);
-      padding: 40px 34px 34px;
-      width: 100%;
-      max-width: 384px;
-      position: relative;
-      overflow: hidden;
-    }
-    .login-box::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--gold-deep), var(--gold-soft) 50%, var(--gold-deep));
-    }
-    .login-logo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-    .login-logo img.logo-full {
-      height: 150px;
-      width: auto;
-      filter: drop-shadow(0 8px 20px rgba(216,168,60,0.14));
-    }
-    .login-box h2 {
-      margin: 0 0 5px 0;
-      font-size: 20px;
-      color: #fff;
-      font-weight: 600;
-      letter-spacing: 0.2px;
-    }
-    .login-box p.subtitle {
-      margin: 0 0 26px 0;
-      font-size: 13.5px;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-    .field { margin-bottom: 17px; }
-    .field label {
-      display: block;
-      font-size: 12.5px;
-      margin-bottom: 7px;
-      color: var(--muted);
-      font-weight: 500;
-    }
-    .field input {
-      width: 100%;
-      padding: 12px 14px;
-      background: var(--navy-deep);
-      border: 1px solid var(--navy-line);
-      border-radius: var(--r-sm);
-      font-size: 14px;
-      color: #fff;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
-    }
-    .field input::placeholder { color: var(--muted-soft); }
-    .field input:hover { border-color: #33447a; }
-    .field input:focus {
-      outline: none;
-      border-color: var(--gold);
-      box-shadow: 0 0 0 3px rgba(216,168,60,0.16);
-    }
-    button.primary {
-      width: 100%;
-      padding: 13px;
-      background: linear-gradient(90deg, var(--gold) 0%, var(--gold-soft) 100%);
-      color: #1D1503;
-      border: none;
-      border-radius: var(--r-sm);
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 6px;
-      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
-      box-shadow: 0 10px 24px rgba(216,168,60,0.22);
-    }
-    button.primary:hover:not(:disabled) { filter: brightness(1.04); transform: translateY(-1px); box-shadow: 0 14px 28px rgba(216,168,60,0.3); }
-    button.primary:active:not(:disabled) { transform: translateY(0); }
-    button.primary:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; }
-    #loginError {
-      color: var(--danger);
-      font-size: 13px;
-      margin-top: 14px;
-      padding: 10px 12px;
-      background: rgba(255,124,124,0.08);
-      border: 1px solid rgba(255,124,124,0.25);
-      border-radius: var(--r-sm);
-      display: none;
-    }
-
-    /* ===================== DASHBOARD ===================== */
-    #dashboardScreen { display: none; }
-
-    .navbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 32px;
-      background: rgba(9,16,35,0.75);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--navy-line-soft);
-      box-shadow: var(--shadow-sm);
-      flex-wrap: wrap;
-      gap: 12px;
-      position: sticky;
-      top: 0;
-      z-index: 20;
-    }
-    .navbar::after {
-      content: '';
-      position: absolute;
-      left: 0; right: 0; bottom: -1px;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--gold) 15%, var(--gold-soft) 50%, var(--gold) 85%, transparent);
-      opacity: 0.55;
-    }
-    .navbar .brand { display: flex; align-items: center; gap: 10px; }
-    .navbar .nav-links { display: flex; gap: 30px; align-self: stretch; }
-    .navbar .nav-links span {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .navbar .nav-links span.active {
-      color: var(--gold-soft);
-      font-weight: 600;
-      border-bottom: 2px solid var(--gold);
-      padding-bottom: 18px;
-      margin-bottom: -15px;
-    }
-    .navbar .profile {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 14px;
-      color: var(--cream);
-    }
-    .navbar .profile .avatar {
-      width: 32px; height: 32px;
+    #loadingScreen.hide { opacity: 0; pointer-events: none; }
+    .spinner {
+      width: 40px; height: 40px;
       border-radius: 50%;
-      background: var(--navy-panel);
-      border: 1px solid var(--navy-line);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px;
+      border: 3px solid rgba(216,168,60,0.2);
+      border-top-color: var(--gold);
+      animation: spin 0.8s linear infinite;
     }
-    .navbar .profile button {
-      background: transparent;
-      border: 1px solid var(--navy-line);
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loadingScreen p {
       color: var(--muted);
-      border-radius: var(--r-sm);
-      padding: 7px 14px;
-      font-size: 12.5px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
-    }
-    .navbar .profile button:hover { border-color: var(--gold); color: var(--gold); background: var(--amber-bg); }
-
-    .hero {
-      position: relative;
-      padding: 40px 32px 30px;
-      overflow: hidden;
-      border-bottom: 1px solid var(--navy-line-soft);
-      background:
-        radial-gradient(circle at 80% 40%, rgba(79,184,245,0.08) 0%, transparent 45%),
-        linear-gradient(180deg, rgba(216,168,60,0.06) 0%, transparent 70%);
-    }
-    .hero-watermark {
-      position: absolute;
-      right: 24px;
-      top: 50%;
-      transform: translateY(-50%);
-      pointer-events: none;
-    }
-    .hero h1 {
-      margin: 0 0 8px 0;
-      font-size: 32px;
-      font-weight: 600;
-      letter-spacing: -0.3px;
-      color: #fff;
-      position: relative;
-      z-index: 1;
-    }
-    .hero h1 .accent { color: var(--gold-soft); }
-    .hero p.tag {
-      margin: 0 0 6px 0;
-      font-size: 15px;
-      color: var(--cream);
-      position: relative;
-      z-index: 1;
-    }
-    .hero p.sub {
+      font-size: 13.5px;
       margin: 0;
-      font-size: 13.5px;
-      color: var(--sky);
-      position: relative;
-      z-index: 1;
-      max-width: 480px;
-      line-height: 1.6;
+      text-align: center;
+      padding: 0 24px;
     }
-
-    .content { padding: 26px 32px 56px; max-width: 1500px; margin: 0 auto; }
-
-    .achieve-section { margin-bottom: 24px; }
-    .achieve-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13.5px;
-      font-weight: 600;
+    #loadingScreen a {
       color: var(--gold-soft);
-      letter-spacing: 0.2px;
-      margin-bottom: 12px;
-    }
-    .achieve-title .achieve-star { color: var(--gold); font-size: 13px; }
-    .stat-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-    }
-    .stat-card {
-      position: relative;
-      overflow: hidden;
-      background: linear-gradient(165deg, var(--navy-panel) 0%, var(--navy-panel-2) 100%);
-      border: 1px solid var(--navy-line);
-      border-radius: var(--r-md);
-      padding: 20px 22px;
-      box-shadow: var(--shadow-sm);
-      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-    }
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      background: var(--accent-grad);
-      opacity: 0.9;
-    }
-    .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: #33447a; }
-    .stat-icon {
-      width: 42px; height: 42px;
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 16px;
-    }
-    .stat-icon svg { width: 21px; height: 21px; }
-    .stat-card.c-blue { --accent-grad: linear-gradient(90deg, #2E7CB8, var(--sky)); }
-    .stat-card.c-blue .stat-icon { background: rgba(79,184,245,0.14); color: var(--sky); border: 1px solid rgba(79,184,245,0.35); }
-    .stat-card.c-green { --accent-grad: linear-gradient(90deg, #1F8F68, var(--green)); }
-    .stat-card.c-green .stat-icon { background: var(--green-bg); color: var(--green); border: 1px solid rgba(47,196,141,0.35); }
-    .stat-card.c-gold { --accent-grad: linear-gradient(90deg, var(--gold-deep), var(--gold-soft)); }
-    .stat-card.c-gold .stat-icon { background: var(--amber-bg); color: var(--gold-soft); border: 1px solid rgba(216,168,60,0.4); }
-    .stat-card.c-teal { --accent-grad: linear-gradient(90deg, #2C9E8A, #4FE5C7); }
-    .stat-card.c-teal .stat-icon { background: rgba(79,229,199,0.14); color: #4FE5C7; border: 1px solid rgba(79,229,199,0.35); }
-    .stat-value { font-size: 30px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.4px; }
-    .stat-label { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
-    .stat-mini-progress { margin-top: 14px; height: 6px; border-radius: 20px; background: rgba(255,255,255,0.07); overflow: hidden; }
-    .stat-mini-fill {
-      height: 100%;
-      width: 0%;
-      border-radius: 20px;
-      background: linear-gradient(90deg, #2C9E8A, #4FE5C7);
-      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    @media (max-width: 900px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 480px) { .stat-grid { grid-template-columns: 1fr; } }
-
-    .filters {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      background: var(--navy-panel);
-      border: 1px solid var(--navy-line);
-      border-radius: var(--r-md);
-      padding: 14px 18px;
-      margin-bottom: 22px;
-      align-items: center;
-      box-shadow: var(--shadow-sm);
-    }
-    .filters input[type="text"], .filters select {
-      background: var(--navy-deep);
-      border: 1px solid var(--navy-line);
-      color: var(--cream);
-      border-radius: var(--r-sm);
-      padding: 10px 13px;
-      font-size: 13.5px;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
-    }
-    .filters input[type="text"]:hover, .filters select:hover { border-color: #33447a; }
-    .filters input[type="text"]:focus, .filters select:focus {
-      outline: none;
-      border-color: var(--gold);
-      box-shadow: 0 0 0 3px rgba(216,168,60,0.16);
-    }
-    .filters input[type="text"] { flex: 1; min-width: 220px; }
-    .filters select { min-width: 150px; cursor: pointer; }
-    .filters .result-count {
-      margin-left: auto;
       font-size: 12.5px;
-      color: var(--muted);
-      white-space: nowrap;
+      text-decoration: none;
+      margin-top: 4px;
     }
+    #loadingScreen a:hover { text-decoration: underline; }
 
-    .panel {
-      background: linear-gradient(165deg, var(--navy-panel) 0%, var(--navy-panel-2) 100%);
-      border: 1px solid var(--navy-line);
-      border-radius: var(--r-md);
-      overflow: hidden;
-      box-shadow: var(--shadow-md);
-    }
-    .panel-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 18px 22px;
-      border-bottom: 1px solid var(--navy-line);
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .panel-head .title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 16px;
-      font-weight: 600;
-      color: #fff;
-    }
-    .panel-head .title .icon-circle {
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      background: var(--amber-bg);
-      border: 1px solid var(--gold-deep);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px;
-      color: var(--gold-soft);
-    }
-    .panel-head .title .icon-circle svg { width: 16px; height: 16px; }
-    .btn-download {
-      background: transparent;
-      border: 1px solid var(--gold-deep);
-      color: var(--gold-soft);
-      padding: 10px 18px;
-      border-radius: var(--r-sm);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s ease, transform 0.12s ease;
-    }
-    .btn-download:hover { background: var(--amber-bg); transform: translateY(-1px); }
-    .btn-download:active { transform: translateY(0); }
-
-    .table-scroll { overflow-x: auto; }
-    .table-hint {
-      display: none;
-      font-size: 11.5px;
-      color: var(--muted);
-      padding: 8px 16px 0;
-      text-align: right;
-    }
-    table { border-collapse: collapse; width: 100%; min-width: 1380px; }
-    thead th {
-      position: sticky;
-      top: 0;
-      background: linear-gradient(180deg, var(--gold-soft), var(--gold));
-      color: #241A02;
-      text-align: left;
-      padding: 13px 16px;
-      font-size: 12.5px;
-      font-weight: 700;
-      white-space: nowrap;
-      z-index: 5;
-    }
-    tbody td {
-      padding: 13px 16px;
-      font-size: 13.5px;
-      border-bottom: 1px solid var(--navy-line-soft);
-      white-space: nowrap;
-      color: var(--cream);
-    }
-    tbody tr { transition: background 0.1s ease; }
-    tbody tr:nth-child(even) { background: rgba(255,255,255,0.015); }
-    tbody tr:hover { background: rgba(216,168,60,0.06); }
-    tbody tr:last-child td { border-bottom: none; }
-
-    /* Bekukan kolom pertama (Nama Pelanggan) saat tabel digeser horizontal */
-    thead th:first-child,
-    tbody td:first-child {
-      position: sticky;
-      left: 0;
-      z-index: 3;
-      box-shadow: 4px 0 8px -3px rgba(0,0,0,0.5);
-    }
-    thead th:first-child { z-index: 6; }
-    tbody td:first-child {
-      background: #0F1C39;
-      font-weight: 500;
-    }
-    tbody tr:nth-child(even) td:first-child { background: #12203F; }
-    tbody tr:hover td:first-child { background: #1A2440; }
-
-    .status-badge {
-      padding: 4px 12px 4px 10px;
-      border-radius: 20px;
-      font-size: 11.5px;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      letter-spacing: 0.2px;
-    }
-    .status-badge::before {
-      content: '';
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: currentColor;
-      flex-shrink: 0;
-    }
-    .status-green { background: var(--green-bg); color: var(--green); }
-    .status-gold { background: var(--amber-bg); color: var(--gold-soft); }
-    .status-red { background: rgba(255,124,124,0.14); color: var(--danger); }
-    .status-default { background: rgba(255,255,255,0.07); color: var(--muted); }
-
-    .btn-edit {
-      background: transparent;
-      border: 1px solid var(--gold-deep);
-      color: var(--gold-soft);
-      padding: 6px 14px;
-      border-radius: var(--r-sm);
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background 0.15s ease, transform 0.12s ease;
-    }
-    .btn-edit:hover { background: var(--amber-bg); transform: translateY(-1px); }
-    .btn-edit:active { transform: translateY(0); }
-
-    /* ===================== EDIT MODAL ===================== */
-    .modal-overlay {
+    /* Tampil hanya jika iframe gagal dimuat (misalnya diblokir jaringan/browser) */
+    #fallback {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(4,7,18,0.65);
-      backdrop-filter: blur(3px);
       align-items: center;
       justify-content: center;
-      z-index: 100;
-      padding: 20px;
-    }
-    .modal-overlay.open { display: flex; }
-    .modal-box {
-      background: linear-gradient(165deg, var(--navy-panel) 0%, var(--navy-panel-2) 100%);
-      border: 1px solid var(--navy-line);
-      border-radius: var(--r-lg);
-      box-shadow: var(--shadow-lg);
-      width: 100%;
-      max-width: 440px;
-      position: relative;
-      overflow: hidden;
-      animation: modalPop 0.18s ease;
-    }
-    @keyframes modalPop {
-      from { opacity: 0; transform: translateY(8px) scale(0.98); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    .modal-box::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--gold-deep), var(--gold-soft) 50%, var(--gold-deep));
-    }
-    .modal-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 22px 0;
-    }
-    .modal-title { font-size: 16px; font-weight: 700; color: #fff; }
-    .modal-close {
-      background: transparent;
-      border: none;
-      color: var(--muted);
-      font-size: 20px;
-      line-height: 1;
-      cursor: pointer;
-      padding: 4px 6px;
-      border-radius: var(--r-sm);
-      transition: color 0.15s ease, background 0.15s ease;
-    }
-    .modal-close:hover { color: #fff; background: rgba(255,255,255,0.06); }
-    .modal-body { padding: 14px 22px 4px; }
-    .modal-customer {
-      font-size: 13.5px;
-      color: var(--gold-soft);
-      font-weight: 600;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--navy-line-soft);
-    }
-    .modal-body .field select,
-    .modal-body .field textarea {
-      width: 100%;
-      padding: 11px 13px;
+      flex-direction: column;
+      gap: 14px;
       background: var(--navy-deep);
-      border: 1px solid var(--navy-line);
-      border-radius: var(--r-sm);
-      font-size: 13.5px;
-      color: #fff;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
-      resize: vertical;
-      font-family: inherit;
-    }
-    .modal-body .field select:focus,
-    .modal-body .field textarea:focus {
-      outline: none;
-      border-color: var(--gold);
-      box-shadow: 0 0 0 3px rgba(216,168,60,0.16);
-    }
-    .modal-body .field select { cursor: pointer; }
-    .modal-error {
-      color: var(--danger);
-      font-size: 12.5px;
-      margin-top: 6px;
-      padding: 9px 11px;
-      background: rgba(255,124,124,0.08);
-      border: 1px solid rgba(255,124,124,0.25);
-      border-radius: var(--r-sm);
-      display: none;
-    }
-    .modal-foot {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      padding: 18px 22px 22px;
-    }
-    .modal-foot .btn-secondary {
-      background: transparent;
-      border: 1px solid var(--navy-line);
-      color: var(--muted);
-      padding: 11px 20px;
-      border-radius: var(--r-sm);
-      font-size: 13.5px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: border-color 0.15s ease, color 0.15s ease;
-    }
-    .modal-foot .btn-secondary:hover { border-color: #33447a; color: var(--cream); }
-    .modal-foot .primary {
-      width: auto;
-      margin-top: 0;
-      padding: 11px 24px;
-    }
-
-    .empty-msg, .loader {
+      z-index: 11;
+      padding: 24px;
       text-align: center;
-      padding: 44px;
-      color: var(--muted);
-      font-size: 13.5px;
     }
-
-    .pagination {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 18px;
-      padding: 18px 22px;
-      flex-wrap: wrap;
-      border-top: 1px solid var(--navy-line);
-    }
-    .pagination button {
-      background: var(--navy-deep);
-      border: 1px solid var(--navy-line);
-      color: var(--cream);
-      padding: 9px 18px;
-      border-radius: var(--r-sm);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease, transform 0.12s ease;
-    }
-    .pagination button:hover:not(:disabled) {
-      border-color: var(--gold);
-      color: var(--gold-soft);
-      background: var(--amber-bg);
-      transform: translateY(-1px);
-    }
-    .pagination button:active:not(:disabled) { transform: translateY(0); }
-    .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
-    .pagination .page-info { font-size: 13px; color: var(--muted); }
-    .pagination .page-info b { color: #fff; font-weight: 700; }
-
-    .app-footer {
-      text-align: center;
-      font-size: 12px;
-      color: var(--muted-soft);
-      padding: 22px 0 6px;
-      letter-spacing: 0.2px;
-    }
-
-    @media (max-width: 720px) {
-      .navbar { padding: 12px 16px; }
-      .navbar .nav-links { display: none; }
-      .navbar .logo-icon { height: 22px; }
-      .hero { padding: 28px 18px 22px; }
-      .hero h1 { font-size: 24px; }
-      .hero p.sub { font-size: 13px; }
-      .content { padding: 18px 16px 36px; }
-      .hero-watermark { display: none; }
-      .filters { padding: 12px 14px; }
-      .filters .result-count { margin-left: 0; width: 100%; }
-      .table-hint { display: block; }
-    }
-
-    @media (max-width: 600px) {
-      .navbar .profile span#mitraNameNav { display: none; }
-      .navbar .profile { gap: 8px; }
-      .navbar .profile button { padding: 7px 11px; font-size: 12px; }
-      .login-box { padding: 30px 22px 26px; max-width: 92vw; }
-      .login-logo img.logo-full { height: 110px; }
-      .modal-box { max-width: 92vw; }
-      .panel-head { padding: 14px 16px; flex-direction: column; align-items: flex-start; }
-      .panel-head .btn-download { width: 100%; justify-content: center; text-align: center; }
-    }
-
-    @media (max-width: 480px) {
-      .stat-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-      .stat-card { padding: 14px 14px; }
-      .stat-icon { width: 34px; height: 34px; margin-bottom: 10px; }
-      .stat-icon svg { width: 17px; height: 17px; }
-      .stat-value { font-size: 22px; }
-      .stat-label { font-size: 11px; }
-      .achieve-title { font-size: 12.5px; margin-bottom: 10px; }
-      .hero h1 { font-size: 21px; }
-      .hero p.tag { font-size: 13.5px; }
-      .filters { flex-direction: column; align-items: stretch; gap: 8px; }
-      .filters input[type="text"], .filters select { min-width: 0; width: 100%; }
-      thead th, tbody td { padding: 10px 12px; font-size: 12.5px; }
-      .btn-edit { padding: 7px 12px; font-size: 11.5px; }
-      .pagination { gap: 10px; padding: 14px 16px; }
-      .pagination button { padding: 8px 14px; font-size: 12.5px; }
-    }
-
-    @media (max-width: 380px) {
-      .navbar .profile .avatar { width: 28px; height: 28px; }
-      .login-box { padding: 26px 16px 22px; }
-      .login-logo img.logo-full { height: 90px; }
-      .stat-grid { grid-template-columns: 1fr; }
-      .modal-foot { flex-direction: column-reverse; }
-      .modal-foot button { width: 100%; }
+    #fallback.show { display: flex; }
+    #fallback p { color: var(--muted); font-size: 14px; max-width: 360px; margin: 0; }
+    #fallback a.btn {
+      background: linear-gradient(90deg, #B4862C, var(--gold-soft));
+      color: #1D1503;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 12px 26px;
+      border-radius: 8px;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
 
-  <!-- ===================== LOGIN SCREEN ===================== -->
-  <div id="loginScreen">
-    <img class="login-watermark" src="data:image/png;base64,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" alt="">
-    <div class="login-box">
-      <div class="login-logo">
-        <img class="logo-full" src="data:image/png;base64,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" alt="Starlite">
-      </div>
-      <h2>Portal Data Mitra</h2>
-      <p class="subtitle">Masuk menggunakan akun mitra Anda</p>
-      <div class="field">
-        <label>Username</label>
-        <input type="text" id="username" placeholder="Masukkan username">
-      </div>
-      <div class="field">
-        <label>Password</label>
-        <input type="password" id="password" placeholder="Masukkan password">
-      </div>
-      <button class="primary" id="btnLogin" onclick="doLogin()">Masuk</button>
-      <div id="loginError"></div>
-    </div>
+  <div id="loadingScreen">
+    <div class="spinner"></div>
+    <p>Memuat Portal Data Mitra...</p>
+    <a href="https://script.google.com/macros/s/AKfycbyICWUHYy7-KGLNR2S93NP1tOEeF8TACHFIt99uYt21kvdcRew1zrRxAMBG-ycUDJZaKw/exec" target="_top">Lama menunggu? Buka langsung di sini</a>
   </div>
 
-  <!-- ===================== DASHBOARD SCREEN ===================== -->
-  <div id="dashboardScreen">
-    <div class="navbar">
-      <div class="brand">
-        <img class="logo-icon" src="data:image/png;base64,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" alt="Starlite">
-      </div>
-      <div class="nav-links">
-        <span class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Dashboard</span>
-      </div>
-      <div class="profile">
-        <div class="avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-        <span id="mitraNameNav">Portal Mitra</span>
-        <button onclick="doLogout()">Keluar</button>
-      </div>
-    </div>
-
-    <div class="hero">
-      <div class="hero-watermark"><img src="data:image/png;base64,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" alt="Starlite"></div>
-      <h1>Halo, <span class="accent" id="mitraName">Mitra</span>!</h1>
-      <p class="tag">Bersama kita tumbuh lebih jauh</p>
-      <p class="sub">Pantau data pelanggan Anda dengan mudah dan raih lebih banyak peluang bersama Starlite.</p>
-    </div>
-
-    <div class="content">
-      <div class="achieve-section">
-        <div class="achieve-title"><span class="achieve-star">&#10022;</span> Pencapaian Mitra</div>
-        <div class="stat-grid">
-          <div class="stat-card c-blue">
-            <div class="stat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            </div>
-            <div class="stat-value" id="totalCount">0</div>
-            <div class="stat-label">Total Pelanggan</div>
-          </div>
-          <div class="stat-card c-green">
-            <div class="stat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            </div>
-            <div class="stat-value" id="updatedCount">0</div>
-            <div class="stat-label">Status Terupdate</div>
-          </div>
-          <div class="stat-card c-gold">
-            <div class="stat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </div>
-            <div class="stat-value" id="pendingCount">0</div>
-            <div class="stat-label">Belum Diupdate</div>
-          </div>
-          <div class="stat-card c-teal">
-            <div class="stat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-            </div>
-            <div class="stat-value" id="achievePercent">0%</div>
-            <div class="stat-label">Pencapaian Anda</div>
-            <div class="stat-mini-progress"><div class="stat-mini-fill" id="achieveFill"></div></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="filters">
-        <input type="text" id="searchInput" placeholder="Cari nama, telepon, alamat, atau kelurahan..." oninput="onFilterChange()">
-        <select id="filterKota" onchange="onFilterChange()">
-          <option value="">Semua Kota</option>
-        </select>
-        <select id="filterStasiun" onchange="onFilterChange()">
-          <option value="">Semua Stasiun</option>
-        </select>
-        <select id="filterStatus" onchange="onFilterChange()">
-          <option value="">Semua Status</option>
-        </select>
-        <span class="result-count" id="resultCount">0 dari 0 pelanggan</span>
-      </div>
-
-      <div class="panel">
-        <div class="panel-head">
-          <div class="title">
-            <span class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></span>
-            Data Pelanggan
-          </div>
-          <button class="btn-download" onclick="downloadCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download Data</button>
-        </div>
-        <div class="table-hint">&#8596; Geser untuk melihat kolom lainnya</div>
-        <div class="table-scroll">
-          <table>
-            <thead>
-              <tr id="tableHead"></tr>
-            </thead>
-            <tbody id="tableBody">
-              <tr><td class="loader">Memuat data...</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="pagination">
-          <button id="btnPrevPage" onclick="prevPage()">&larr; Sebelumnya</button>
-          <span class="page-info">Halaman <b id="pageCurrent">1</b> dari <b id="pageTotal">1</b></span>
-          <button id="btnNextPage" onclick="nextPage()">Selanjutnya &rarr;</button>
-        </div>
-      </div>
-
-      <div class="app-footer">Starlite &middot; Portal Mitra &middot; data langsung dari Google Sheets &middot; <a href="https://script.google.com/macros/s/AKfycbyICWUHYy7-KGLNR2S93NP1tOEeF8TACHFIt99uYt21kvdcRew1zrRxAMBG-ycUDJZaKw/exec" target="_blank" rel="noopener" style="color: var(--gold-soft); text-decoration: none;">Buka Tab Penuh &#8599;</a></div>
-    </div>
+  <div id="fallback">
+    <p>Portal tidak bisa ditampilkan di halaman ini. Klik tombol di bawah untuk membukanya langsung.</p>
+    <a class="btn" href="https://script.google.com/macros/s/AKfycbyICWUHYy7-KGLNR2S93NP1tOEeF8TACHFIt99uYt21kvdcRew1zrRxAMBG-ycUDJZaKw/exec" target="_top">Buka Portal Data Mitra</a>
   </div>
 
-  <!-- ===================== MODAL EDIT STATUS & REMARKS ===================== -->
-  <div class="modal-overlay" id="editModalOverlay">
-    <div class="modal-box">
-      <div class="modal-head">
-        <div class="modal-title">Update Status Pelanggan</div>
-        <button class="modal-close" onclick="closeEditModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="modal-customer" id="editCustomerName">-</div>
-        <div class="field">
-          <label>Status</label>
-          <select id="editStatusSelect">
-            <option value="">-- Pilih Status --</option>
-            <option value="Berminat pakai Starlite">1. Berminat pakai Starlite</option>
-            <option value="Tidak berminat pakai Starlite">2. Tidak berminat pakai Starlite</option>
-            <option value="Masih mikir-mikir dulu">3. Masih mikir-mikir dulu</option>
-            <option value="Sudah memakai provider lain">4. Sudah memakai provider lain</option>
-            <option value="Masalah keuangan">5. Masalah keuangan</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Remarks</label>
-          <textarea id="editRemarksInput" rows="3" placeholder="Catatan tambahan..."></textarea>
-        </div>
-        <div class="modal-error" id="editModalError"></div>
-      </div>
-      <div class="modal-foot">
-        <button class="btn-secondary" onclick="closeEditModal()">Batal</button>
-        <button class="primary" id="btnSaveEdit" onclick="saveEditModal()">Simpan</button>
-      </div>
-    </div>
-  </div>
+  <iframe
+    id="appFrame"
+    src="https://script.google.com/macros/s/AKfycbyICWUHYy7-KGLNR2S93NP1tOEeF8TACHFIt99uYt21kvdcRew1zrRxAMBG-ycUDJZaKw/exec"
+    title="Portal Data Mitra Starlite"
+    allow="clipboard-write"
+  ></iframe>
 
   <script>
-    let currentMitra = null;
-    let allHeaders = [];
-    let allRows = [];
-    const PAGE_SIZE = 5;
-    let currentPage = 1;
-    let allRowIds = [];
-    let currentEditIndex = null;
+    var APP_URL = 'https://script.google.com/macros/s/AKfycbyICWUHYy7-KGLNR2S93NP1tOEeF8TACHFIt99uYt21kvdcRew1zrRxAMBG-ycUDJZaKw/exec';
+    var frame = document.getElementById('appFrame');
+    var loadingScreen = document.getElementById('loadingScreen');
+    var fallback = document.getElementById('fallback');
+    var loaded = false;
 
-    function doLogin() {
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const errEl = document.getElementById('loginError');
-      const btn = document.getElementById('btnLogin');
-
-      errEl.style.display = 'none';
-
-      if (!username || !password) {
-        errEl.textContent = 'Username dan password wajib diisi.';
-        errEl.style.display = 'block';
-        return;
-      }
-
-      btn.disabled = true;
-      btn.textContent = 'Memproses...';
-
-      google.script.run
-        .withSuccessHandler(function(result) {
-          btn.disabled = false;
-          btn.textContent = 'Masuk';
-          if (result.success) {
-            currentMitra = result;
-            showDashboard();
-          } else {
-            errEl.textContent = result.message || 'Login gagal.';
-            errEl.style.display = 'block';
-          }
-        })
-        .withFailureHandler(function(err) {
-          btn.disabled = false;
-          btn.textContent = 'Masuk';
-          errEl.textContent = 'Terjadi kesalahan: ' + err.message;
-          errEl.style.display = 'block';
-        })
-        .login(username, password);
-    }
-
-    function showDashboard() {
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('dashboardScreen').style.display = 'block';
-      document.getElementById('mitraName').textContent = currentMitra.namaMitra;
-      document.getElementById('mitraNameNav').textContent = currentMitra.namaMitra;
-      loadData();
-    }
-
-    function doLogout() {
-      currentMitra = null;
-      allHeaders = [];
-      allRows = [];
-      allRowIds = [];
-      currentPage = 1;
-      closeEditModal();
-      document.getElementById('username').value = '';
-      document.getElementById('password').value = '';
-      document.getElementById('dashboardScreen').style.display = 'none';
-      document.getElementById('loginScreen').style.display = 'flex';
-    }
-
-    function loadData() {
-      google.script.run
-        .withSuccessHandler(function(result) {
-          if (result.success) {
-            allHeaders = result.headers;
-            allRows = result.rows;
-            allRowIds = result.rowIds || [];
-            buildHeader();
-            populateFilters();
-            updateAchievement();
-            currentPage = 1;
-            renderTable();
-          } else {
-            document.getElementById('tableBody').innerHTML =
-              '<tr><td class="empty-msg">' + (result.message || 'Gagal memuat data') + '</td></tr>';
-          }
-        })
-        .withFailureHandler(function(err) {
-          document.getElementById('tableBody').innerHTML =
-            '<tr><td class="empty-msg">Terjadi kesalahan: ' + err.message + '</td></tr>';
-        })
-        .getDataMitra(currentMitra.namaMitra);
-    }
-
-    function buildHeader() {
-      const headRow = document.getElementById('tableHead');
-      headRow.innerHTML = allHeaders.map(h => '<th>' + h + '</th>').join('') + '<th>Aksi</th>';
-    }
-
-    function populateFilters() {
-      const kotaIndex = allHeaders.indexOf('Kota');
-      const stasiunIndex = allHeaders.indexOf('Stasiun');
-
-      const kotaSet = new Set();
-      const stasiunSet = new Set();
-      allRows.forEach(row => {
-        if (kotaIndex !== -1 && row[kotaIndex]) kotaSet.add(row[kotaIndex]);
-        if (stasiunIndex !== -1 && row[stasiunIndex]) stasiunSet.add(row[stasiunIndex]);
-      });
-
-      const kotaSelect = document.getElementById('filterKota');
-      kotaSelect.innerHTML = '<option value="">Semua Kota</option>' +
-        [...kotaSet].sort().map(k => '<option value="' + k + '">' + k + '</option>').join('');
-
-      const stasiunSelect = document.getElementById('filterStasiun');
-      stasiunSelect.innerHTML = '<option value="">Semua Stasiun</option>' +
-        [...stasiunSet].sort().map(s => '<option value="' + s + '">' + s + '</option>').join('');
-
-      const statusSelect = document.getElementById('filterStatus');
-      statusSelect.innerHTML = '<option value="">Semua Status</option>' +
-        '<option value="__BELUM_DIUPDATE__">Belum diupdate</option>' +
-        STATUS_OPTIONS.map(s => '<option value="' + s + '">' + s + '</option>').join('');
-    }
-
-    // Daftar status yang boleh dipilih, sama persis dengan dropdown di popup edit
-    const STATUS_OPTIONS = [
-      'Berminat pakai Starlite',
-      'Tidak berminat pakai Starlite',
-      'Masih mikir-mikir dulu',
-      'Sudah memakai provider lain',
-      'Masalah keuangan'
-    ];
-
-    // Warna badge untuk tiap pilihan status di popup edit
-    const STATUS_BADGE_CLASS = {
-      'Berminat pakai Starlite': 'status-green',
-      'Tidak berminat pakai Starlite': 'status-red',
-      'Masih mikir-mikir dulu': 'status-gold',
-      'Sudah memakai provider lain': 'status-red',
-      'Masalah keuangan': 'status-red'
-    };
-
-    function updateAchievement() {
-      const statusIndex = allHeaders.indexOf('Status');
-      const total = allRows.length;
-      let updated = 0;
-      allRows.forEach(row => {
-        const status = statusIndex !== -1 ? (row[statusIndex] || '').toString().trim() : '';
-        if (status) updated++;
-      });
-      const pending = total - updated;
-      const percent = total > 0 ? Math.round((updated / total) * 100) : 0;
-
-      document.getElementById('totalCount').textContent = total;
-      document.getElementById('updatedCount').textContent = updated;
-      document.getElementById('pendingCount').textContent = pending;
-      document.getElementById('achievePercent').textContent = percent + '%';
-      document.getElementById('achieveFill').style.width = percent + '%';
-    }
-
-    function statusBadge(status) {
-      status = (status || '').toString().trim();
-      if (!status) return '<span class="status-badge status-default">Belum diupdate</span>';
-      const cls = STATUS_BADGE_CLASS[status] || 'status-default';
-      return '<span class="status-badge ' + cls + '">' + status + '</span>';
-    }
-
-    // Mengembalikan daftar INDEX (bukan isi baris) yang lolos search + filter,
-    // supaya tombol edit tetap tahu baris asli di allRows/allRowIds.
-    function getFilteredIndices() {
-      const query = document.getElementById('searchInput').value.toLowerCase().trim();
-      const kotaFilter = document.getElementById('filterKota').value;
-      const stasiunFilter = document.getElementById('filterStasiun').value;
-      const statusFilter = document.getElementById('filterStatus').value;
-      const kotaIndex = allHeaders.indexOf('Kota');
-      const stasiunIndex = allHeaders.indexOf('Stasiun');
-      const statusIndex = allHeaders.indexOf('Status');
-
-      const indices = [];
-      allRows.forEach((row, i) => {
-        if (kotaFilter && row[kotaIndex] !== kotaFilter) return;
-        if (stasiunFilter && row[stasiunIndex] !== stasiunFilter) return;
-        if (statusFilter) {
-          const rowStatus = (row[statusIndex] || '').toString().trim();
-          if (statusFilter === '__BELUM_DIUPDATE__') {
-            if (rowStatus) return;
-          } else if (rowStatus !== statusFilter) {
-            return;
-          }
-        }
-        if (query && !row.some(cell => (cell || '').toString().toLowerCase().indexOf(query) !== -1)) return;
-        indices.push(i);
-      });
-      return indices;
-    }
-
-    function onFilterChange() {
-      currentPage = 1;
-      renderTable();
-    }
-
-    function prevPage() {
-      if (currentPage > 1) {
-        currentPage--;
-        renderTable();
-      }
-    }
-
-    function nextPage() {
-      const totalPages = Math.max(1, Math.ceil(getFilteredIndices().length / PAGE_SIZE));
-      if (currentPage < totalPages) {
-        currentPage++;
-        renderTable();
-      }
-    }
-
-    function renderTable() {
-      const filteredIdx = getFilteredIndices();
-      const statusIndex = allHeaders.indexOf('Status');
-
-      document.getElementById('resultCount').textContent = filteredIdx.length + ' dari ' + allRows.length + ' pelanggan';
-
-      const totalPages = Math.max(1, Math.ceil(filteredIdx.length / PAGE_SIZE));
-      if (currentPage > totalPages) currentPage = totalPages;
-      if (currentPage < 1) currentPage = 1;
-
-      document.getElementById('pageCurrent').textContent = currentPage;
-      document.getElementById('pageTotal').textContent = totalPages;
-      document.getElementById('btnPrevPage').disabled = currentPage <= 1;
-      document.getElementById('btnNextPage').disabled = currentPage >= totalPages;
-
-      const tbody = document.getElementById('tableBody');
-      if (filteredIdx.length === 0) {
-        tbody.innerHTML = '<tr><td class="empty-msg">Tidak ada data ditemukan.</td></tr>';
-        return;
-      }
-
-      const start = (currentPage - 1) * PAGE_SIZE;
-      const pageIdx = filteredIdx.slice(start, start + PAGE_SIZE);
-
-      tbody.innerHTML = pageIdx.map(i => {
-        const row = allRows[i];
-        const cells = row.map((val, idx) => {
-          if (idx === statusIndex) {
-            return '<td>' + statusBadge(val) + '</td>';
-          }
-          return '<td>' + (val || '-') + '</td>';
-        }).join('');
-        return '<tr>' + cells + '<td><button class="btn-edit" onclick="openEditModal(' + i + ')">&#9998; Edit</button></td></tr>';
-      }).join('');
-    }
-
-    function downloadCSV() {
-      const filteredIdx = getFilteredIndices();
-      if (filteredIdx.length === 0) return;
-      let csv = allHeaders.join(',') + '\n';
-      filteredIdx.forEach(i => {
-        csv += allRows[i].map(v => '"' + (v || '').toString().replace(/"/g, '""') + '"').join(',') + '\n';
-      });
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'data_pelanggan_' + (currentMitra ? currentMitra.namaMitra : 'mitra') + '.csv';
-      link.click();
-    }
-
-    // ===================== MODAL EDIT STATUS & REMARKS =====================
-    function openEditModal(index) {
-      currentEditIndex = index;
-      const row = allRows[index];
-      const nameIdx = allHeaders.indexOf('Nama Pelanggan');
-      const statusIdx = allHeaders.indexOf('Status');
-      const remarksIdx = allHeaders.indexOf('Remarks');
-
-      document.getElementById('editCustomerName').textContent = row[nameIdx] || '-';
-      document.getElementById('editStatusSelect').value = row[statusIdx] || '';
-      document.getElementById('editRemarksInput').value = row[remarksIdx] || '';
-
-      const errEl = document.getElementById('editModalError');
-      errEl.style.display = 'none';
-      errEl.textContent = '';
-
-      document.getElementById('editModalOverlay').classList.add('open');
-    }
-
-    function closeEditModal() {
-      currentEditIndex = null;
-      document.getElementById('editModalOverlay').classList.remove('open');
-    }
-
-    function saveEditModal() {
-      if (currentEditIndex === null) return;
-
-      const status = document.getElementById('editStatusSelect').value;
-      const remarks = document.getElementById('editRemarksInput').value.trim();
-      const errEl = document.getElementById('editModalError');
-      const btn = document.getElementById('btnSaveEdit');
-      const rowId = allRowIds[currentEditIndex];
-
-      errEl.style.display = 'none';
-      btn.disabled = true;
-      btn.textContent = 'Menyimpan...';
-
-      google.script.run
-        .withSuccessHandler(function(result) {
-          btn.disabled = false;
-          btn.textContent = 'Simpan';
-          if (result.success) {
-            const statusIdx = allHeaders.indexOf('Status');
-            const remarksIdx = allHeaders.indexOf('Remarks');
-            allRows[currentEditIndex][statusIdx] = status;
-            allRows[currentEditIndex][remarksIdx] = remarks;
-            updateAchievement();
-            populateFilters();
-            renderTable();
-            closeEditModal();
-          } else {
-            errEl.textContent = result.message || 'Gagal menyimpan perubahan.';
-            errEl.style.display = 'block';
-          }
-        })
-        .withFailureHandler(function(err) {
-          btn.disabled = false;
-          btn.textContent = 'Simpan';
-          errEl.textContent = 'Terjadi kesalahan: ' + err.message;
-          errEl.style.display = 'block';
-        })
-        .updatePelangganStatus(rowId, currentMitra.namaMitra, status, remarks);
-    }
-
-    document.getElementById('password').addEventListener('keyup', function(e) {
-      if (e.key === 'Enter') doLogin();
+    frame.addEventListener('load', function () {
+      loaded = true;
+      loadingScreen.classList.add('hide');
+      setTimeout(function () { loadingScreen.style.display = 'none'; }, 400);
     });
 
-    // Tutup modal jika klik di luar kotak, atau tekan Escape
-    document.getElementById('editModalOverlay').addEventListener('click', function(e) {
-      if (e.target === this) closeEditModal();
-    });
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && document.getElementById('editModalOverlay').classList.contains('open')) {
-        closeEditModal();
+    // Kalau dalam 8 detik iframe belum juga selesai load (kemungkinan diblokir), tampilkan tombol fallback
+    setTimeout(function () {
+      if (!loaded) {
+        loadingScreen.style.display = 'none';
+        fallback.classList.add('show');
       }
-    });
+    }, 8000);
   </script>
 </body>
 </html>
