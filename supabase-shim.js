@@ -56,6 +56,14 @@
     return tx ? JSON.parse(tx) : null;
   }
 
+  // ---------- Teruskan ke Apps Script (menu yang belum dipindah ke Supabase) ----------
+  async function rpc(fn, args) {
+    var r = await fetch(APPS_PING, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: fn, args: args }) });
+    var j = await r.json();
+    if (!j.ok) throw new Error(j.error || 'Gagal memanggil server.');
+    return j.result;
+  }
+
   // ---------- LOGIN ----------
   async function login(username, password) {
     username = String(username || '').trim(); password = String(password || '').trim();
@@ -67,7 +75,9 @@
         simpanToken(j);
         var admin = md.role === 'admin';
         if (!admin && md.role !== 'mitra') return { success: false, message: 'Akun ini belum diberi akses.' };
-        return { success: true, namaMitra: admin ? 'Semua Mitra' : md.mitra, username: ((j.user.user_metadata || {}).username) || username, isAdmin: admin, token: 'sb' };
+        var tok = '';
+        try { var lr = await rpc('login', [username, password]); if (lr && lr.success) tok = lr.token || ''; } catch (e) { }
+        return { success: true, namaMitra: admin ? 'Semua Mitra' : md.mitra, username: ((j.user.user_metadata || {}).username) || username, isAdmin: admin, token: tok };
       }
       if (r.status === 429) return { success: false, message: 'Terlalu banyak percobaan login. Coba lagi beberapa menit lagi.' };
       if (r.status >= 500) return { success: false, message: 'Server login sedang bermasalah. Coba lagi.' };
@@ -164,7 +174,7 @@
         return function () {
           var args = Array.prototype.slice.call(arguments);
           Promise.resolve().then(function () {
-            return IMPL[name] ? IMPL[name].apply(null, args) : { success: false, message: BELUM };
+            return IMPL[name] ? IMPL[name].apply(null, args) : rpc(name, args);
           }).then(function (r) { if (ok) ok(r); }, function (e) { if (bad) bad(e); else console.error(e); });
         };
       }
