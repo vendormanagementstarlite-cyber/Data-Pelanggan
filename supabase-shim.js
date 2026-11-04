@@ -73,7 +73,7 @@
       if (r.ok) {
         var j = await r.json(), md = (j.user && j.user.app_metadata) || {};
         simpanToken(j);
-        var admin = md.role === 'admin';
+        var admin = md.role === 'admin'; try { localStorage.setItem('sb_shim_admin', admin ? '1' : '0'); } catch (e) { }
         if (!admin && md.role !== 'mitra') return { success: false, message: 'Akun ini belum diberi akses.' };
         var tok = '';
         try { var lr = await rpc('login', [username, password]); if (lr && lr.success) tok = lr.token || ''; } catch (e) { }
@@ -162,6 +162,27 @@
     getAppVersion: function () { return 'sb-1'; }
   };
 
+
+  // ---------- SALINAN MENU DARI SUPABASE (WO, Potensial, FWA, MGM, Signal Low, riwayat update) ----------
+  var SNAP = { getDataWO: 'wo', getDataPotensial: 'pot', getDataFWA: 'fwa', getDataMGM: 'mgm', getDataSignalLow: 'signal', getUpdateWO: 'updwo', getUpdatePotensial: 'updpot' };
+  var TULIS = { updateWO: 1, bulkUpdateWO: 1, updatePotensial: 1, bulkUpdatePotensial: 1, updateMGM: 1, updateSignalLow: 1, bulkUpdateSignalLow: 1, bulkUpdatePelanggan: 1 };
+  function snapReader(fn, menu) {
+    return async function () {
+      var args = Array.prototype.slice.call(arguments);
+      var paksa = (fn.indexOf('getData') === 0 && fn !== 'getDataMGM' && fn !== 'getDataSignalLow') ? args[1] === true : false;
+      if (!paksa) {
+        try {
+          var admin = localStorage.getItem('sb_shim_admin') === '1';
+          var q = 'menu_snap?select=part,payload&menu=eq.' + menu + (admin ? '&scope=eq.admin' : '') + '&order=part.asc';
+          var rows = await restJson(q);
+          if (rows && rows.length) return JSON.parse(rows.map(function (r) { return r.payload; }).join(''));
+        } catch (e) { console.warn('Salinan ' + menu + ' gagal, pakai server lama:', e); }
+      }
+      return rpc(fn, args);
+    };
+  }
+  Object.keys(SNAP).forEach(function (fn) { IMPL[fn] = snapReader(fn, SNAP[fn]); });
+
   // ---------- google.script.run versi Supabase ----------
   function runner(ok, bad) {
     var base = {
@@ -174,7 +195,7 @@
         return function () {
           var args = Array.prototype.slice.call(arguments);
           Promise.resolve().then(function () {
-            return IMPL[name] ? IMPL[name].apply(null, args) : rpc(name, args);
+            return IMPL[name] ? IMPL[name].apply(null, args) : rpc(name, args).then(function (r) { if (TULIS[name]) ping(); return r; });
           }).then(function (r) { if (ok) ok(r); }, function (e) { if (bad) bad(e); else console.error(e); });
         };
       }
